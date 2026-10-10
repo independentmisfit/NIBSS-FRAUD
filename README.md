@@ -1,4 +1,4 @@
-```markdown
+
 # GPU-Accelerated Financial Fraud Detection on NIBSS Transactions
 
 Welcome to the official repository for the **NIBSS Financial Fraud Detection Pipeline**. This project utilizes advanced machine learning, synthetic oversampling, and GPU-accelerated computing (NVIDIA RAPIDS cuML) to scan, process, and accurately detect fraudulent transactions out of 1,000,000 transaction records.
