@@ -1,73 +1,95 @@
-# NIBSS-FRAUD
-Indepth analysis of NIBSS fraud dataset
-# # Fraud Detection Project: NIBSS Transaction Analysis & Modeling
+```markdown
+# GPU-Accelerated Financial Fraud Detection on NIBSS Transactions
 
-Welcome to the repository for our **Financial Fraud Detection Pipeline**. Below is an easy-to-understand explanation of the data we analyzed, the discoveries we made, why we measure our models the way we do, and which model won the "champion" title to protect our financial system.
-
----
-
-## 📋 What is this Dataset?
-This project analyzes **1,000,000 transaction records** from the NIBSS (Nigeria Inter-Bank Settlement System). Think of this data as a giant digital ledger detailing everyday banking activities, including:
-* **Transaction Details:** The cash amount, what time of day it happened, the date, and the month.
-* **Where and How:** Whether the transaction took place on a mobile app, on a website, at a POS terminal (card machine), or at an ATM, as well as the general location.
-* **Customer Profile:** Broad categories such as age groups.
-* **The Catch:** A special flag (`is_fraud`) identifying whether a transaction was confirmed as a scam/fraud (value = 1) or was a normal, legitimate purchase (value = 0).
-
-### The "Needle in a Haystack" Problem
-Out of 1 million transactions, **only 3,000 are actual fraud**. This means **99.7% of all banking activity is completely normal**, while **only 0.3% is fraudulent**. This extreme imbalance is the single biggest challenge in fraud detection.
+Welcome to the official repository for the **NIBSS Financial Fraud Detection Pipeline**. This project utilizes advanced machine learning, synthetic oversampling, and GPU-accelerated computing (NVIDIA RAPIDS cuML) to scan, process, and accurately detect fraudulent transactions out of 1,000,000 transaction records.
 
 ---
 
-## 🔍 What We Found in Our Data Analysis (The Results)
-Before building AI models, we explored the dataset to spot patterns. Here is what we found in simple terms:
-1. **High-Risk Channels:** Fraudsters don't use every channel equally. A significant portion of fraudulent activity is concentrated around **Mobile Transactions**, making mobile apps a primary battleground for security.
-2. **The Timing of Fraud:** Fraud rates show noticeable peaks during specific times. For instance, **Sunday** displays a slightly higher rate of fraudulent activity compared to other days of the week, and late-night/early-morning hours see higher concentrations of malicious attempts.
-3. **How Fraud Happens:** When fraud is detected and recorded, "Social Engineering" (tricking users into giving away keys/passwords) and "PIN Compromise" are the most common tactics used by scammers.
-4. **The Alert Trade-off (A/B Test Simulation):** We ran a test comparing two rules:
-   * **Lenient Alert Rule:** Flagged anything that looked even slightly risky. It caught **93.8% of all fraud**, but generated an overwhelming flood of false alarms—flagging **94% of clean transactions** as suspicious!
-   * **Smart/Strict Alert Rule:** Raised the bar of what we consider risky. This reduced false alarms significantly (down to **75% of clean transactions**), but it meant we only caught **75% of actual fraud**. 
+## 📋 Project & Data Overview
+This project processes real-world transactional data sourced from the **NIBSS (Nigeria Inter-Bank Settlement System)**. The dataset contains **1,000,000 transactions**, mapping consumer demographic behavior, transaction types, geographic locations, and temporal stamps.
+
+### The "Needle in a Haystack" Challenge (Class Imbalance)
+In real life, fraud is highly rare—which is great for banks, but incredibly difficult for machine learning models. Out of our 1 million records, **only 3,000 are actual fraudulent transactions (0.3%)**, while **997,000 are legitimate (99.7%)**. 
+
+Traditional models trained on this data would cheat: by simply guessing "Legitimate" for every single transaction, a model would be **99.7% accurate** while catching exactly **0% of the scammers**.
 
 ---
 
-## 📊 Why We Use PR AUC to Evaluate Our Models
-When dealing with fraud, standard metrics like **Accuracy** can lie to you. 
-* **The Accuracy Lie:** If a model simply predicts that *every single transaction is clean*, it will be **99.7% accurate**! But it will catch **0% of the fraud**, rendering it useless.
-* **ROC AUC is Too Lenient:** Another standard metric, ROC AUC, can look extremely high (e.g., 95%) because it compares false alarms against the massive pool of 997,000 clean transactions, hiding how many mistakes it is actually making.
+## 🔍 Deep Dive: Exploratory Data Analysis (EDA)
+Before writing predictive code, we explored the dataset to map out exactly how scammers operate. Here is what our analysis uncovered in simple terms:
 
-### The Solution: PR AUC (Precision-Recall Area Under the Curve)
-We evaluate our models using **PR AUC**. This metric forces the model to focus strictly on two things:
-1. **Precision (No False Alarms):** When the model rings the alarm, is it *actually* fraud? Or are we locking up an innocent customer's card? We want this to be as close to 100% as possible.
-2. **Recall (Catching the Bad Guys):** Out of all the real fraud happening, how much did we successfully catch?
+### 1. Where Does Fraud Hide? (Channel & Category Exploits)
+* **Mobile is the Weak Link:** Scammers heavily favor the **Mobile channel** over ATMs, Web portals, and physical POS terminals. Mobile transactions show a disproportionately high rate of fraud, making mobile security policies the highest priority.
+* **Merchant Targeted Attacks:** Fraudulent activities are not randomly scattered. Scammers focus heavily on specific merchant categories where value can be quickly transferred or liquidated.
 
-**PR AUC** calculates a combined score of these two forces. A higher PR AUC score means the model is excellent at catching real fraud *without* ruining the experience of normal shoppers.
+### 2. When Does Fraud Happen? (Temporal & Timing Patterns)
+* **The Sunday Surge:** Transactions initiated on **Sundays** exhibit a noticeably higher fraud rate than those on weekdays. This is likely due to slower manual review times or lower victim vigilance over weekends.
+* **Night Owl Operations:** The hour of the day is a critical indicator. Scammer activity spikes significantly during the **late-night and early-morning hours (11:00 PM to 4:00 AM)**. During these hours, legitimate transaction traffic is low, making any transaction inherently riskier.
 
----
+### 3. How is Fraud Executed? (Scam Techniques)
+* **Social Engineering & PIN Theft:** For cases where the technique was captured, **Social Engineering** (tricking customers into revealing passwords/OTPs) and **PIN Compromise** were the primary methods used by criminals, outnumbering direct cyberattacks.
 
-## 🏆 Meet the Champion Model: XGBoost
-We trained and tested several models on our balanced dataset. Here is the final leaderboard:
-
-* **Logistic Regression:** PR AUC **0.13** (Caught fraud, but flagged far too many normal customers).
-* **Random Forest:** PR AUC **0.15**.
-* **CatBoost:** PR AUC **0.68**.
-* **XGBoost (CHAMPION):** PR AUC **0.70**.
-
-### Why XGBoost Won
-**XGBoost** is our champion because it struck the ultimate balance:
-* It achieved a **PR AUC of 0.70** (the highest among all models).
-* On our test data, whenever XGBoost predicted a transaction was fraud, it was correct **100% of the time (100% Precision)**. This is a dream for operational teams, as it means investigators waste zero time chasing false alarms.
-* Simultaneously, it successfully caught **41% of all active fraud** in a single sweep.
+### 4. Who is Vulnerable?
+* Specific age groups and bank regions are targeted much more frequently than others, indicating that fraudulent campaigns are deliberately targeted at certain consumer demographics.
 
 ---
 
-## 💾 How to Use the Saved Model
-The champion model has been serialized and saved as **`champion_xgboost_model.joblib`**.
+## ⚖️ How We Addressed Class Imbalance (SMOTE)
+To prevent our models from ignoring the 0.3% minority of fraud, we employed **SMOTE (Synthetic Minority Over-sampling Technique)** on our training data.
+* **How SMOTE Works:** Instead of simply copying the existing 2,100 training fraud cases over and over (which causes overfitting), SMOTE looks at the existing cases, draws lines between them in a high-dimensional space, and **creates completely brand-new, synthetic fraud transactions** along those lines.
+* **The Result:** We balanced the training dataset perfectly to **50% legitimate (697,900 rows) and 50% fraudulent (697,900 rows)**, giving our AI enough patterns to recognize fraud when it appears.
 
-You can load it into your Python environment with just two lines of code:
+---
+
+## ⚡ GPU Acceleration with RAPIDS cuML
+Training models on nearly **1.4 million balanced rows** using a traditional CPU can take hours. To solve this, we used **RAPIDS cuML**:
+* **What is cuML?** It is a suite of GPU-accelerated machine learning libraries developed by NVIDIA. It mirrors standard Python tools like scikit-learn but executes mathematical operations on the GPU cores instead of the CPU.
+* **Why it matters:** By utilizing the **NVIDIA Tesla T4 GPU** in Google Colab, we trained complex ensembles like **Random Forests** and **XGBoost** in mere *seconds* rather than hours, allowing us to rapidly iterate and find the best model parameters.
+
+---
+
+## 📊 Why We Use PR AUC for Evaluation
+For highly imbalanced datasets, standard metrics fail us:
+* **Accuracy:** Completely useless (as explained in the *Needle in a Haystack* section).
+* **ROC AUC:** Measures broad class separation. However, because our clean transaction pool is massive (997,000 rows), a model could flag thousands of innocent customers (false positives) and still maintain an elite ROC AUC score (e.g. 95%).
+
+### The Solution: Precision-Recall AUC (PR AUC)
+PR AUC measures performance on the *minority class only*:
+* **Precision (Zero False Alarms):** If the model flags a transaction, how certain are we that it's actually fraud? (Higher precision = fewer locked customer cards).
+* **Recall (Catching Fraud):** Out of all actual fraud, how much did we stop? (Higher recall = safer banking environment).
+
+Optimizing for **PR AUC** ensures our model catches scammers while protecting normal users from disruption.
+
+---
+
+## 🏆 Model Leaderboard & Our Champion
+Here is how our GPU-accelerated models performed on the unseen test set:
+
+| Model | ROC AUC | PR AUC | Key Feature |
+| :--- | :---: | :---: | :--- |
+| **Logistic Regression** | 0.80 | **0.13** | High recall, but generated far too many false alerts. |
+| **Random Forest (cuML)** | 0.89 | **0.15** | Fast training on GPU, but average performance. |
+| **CatBoost (GPU)** | 0.94 | **0.68** | Highly accurate, handles categorical structures beautifully. |
+| **XGBoost (CHAMPION)** | **0.95** | **0.70** | **Best overall balance (F1-score: 0.58).** |
+
+### The Winner: XGBoost
+Our **XGBoost GPU model** emerged as the clear champion with a **PR AUC of 0.70**:
+* **100% Precision:** In our testing set, every single transaction flagged by XGBoost as fraud was **indeed fraud**. This means absolute zero false alarms, saving valuable time for security analysts.
+* **41% Recall:** It caught **41% of all active fraud** in a single pass without disrupting any innocent customers.
+
+---
+
+## 💾 Deployment & How to Use the Model
+Our champion model has been compiled and saved as **`champion_xgboost_model.joblib`**.
+
+You can load it and run inference in your local environment:
 ```python
 import joblib
+
 # Load the champion model
 model = joblib.load('champion_xgboost_model.joblib')
 
-# Make predictions on new transaction data
-# predictions = model.predict(new_transactions)
+# Make predictions on new transaction records
+# predictions = model.predict(new_data)
+```
 ```
