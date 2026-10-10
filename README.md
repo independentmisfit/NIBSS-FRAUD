@@ -15,6 +15,15 @@ Traditional models trained on this data would cheat: by simply guessing "Legitim
 
 ---
 
+This project uses the [NIBSS Fraud Dataset](https://www.kaggle.com/datasets/hendurhance/nibsss-fraud-dataset) 
+(Kaggle, hendurhance), a **fully synthetic** dataset of 1,000,000 transactions.
+
+**Important:** No real transaction, account, or customer data is used anywhere in this project. 
+The dataset was generated to statistically resemble real Nigerian banking activity — its fraud 
+rate (0.30%) and behavioral patterns (channel risk, time-of-day effects) were calibrated against 
+published NIBSS 2023 fraud statistics, but every row is synthetically generated, not sourced from 
+an actual bank or NIBSS systems.
+
 ## 🔍 Deep Dive: Exploratory Data Analysis (EDA)
 Before writing predictive code, we explored the dataset to map out exactly how scammers operate. Here is what our analysis uncovered in simple terms:
 
