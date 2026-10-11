@@ -23,7 +23,9 @@ DAY_NAMES = {0: "Mon", 1: "Tue", 2: "Wed", 3: "Thu", 4: "Fri", 5: "Sat", 6: "Sun
 
 st.markdown(f"""
 <style>
-    .stApp {{ background-color: {BG}; }}
+    .stApp {{ background-color: {BG}; color: {NAVY}; }}
+
+    /* KPI metric cards */
     div[data-testid="stMetric"] {{
         background-color: white;
         border: 1px solid #DDE3EC;
@@ -31,6 +33,35 @@ st.markdown(f"""
         padding: 14px 16px;
         border-top: 3px solid {BLUE};
     }}
+    div[data-testid="stMetricLabel"] {{ color: #5B6B82 !important; }}
+    div[data-testid="stMetricValue"] {{ color: {NAVY} !important; }}
+    div[data-testid="stMetricDelta"] {{ color: {ALERT} !important; }}
+
+    /* Chart section headers (st.subheader) */
+    h3 {{ color: {NAVY} !important; }}
+
+    /* Tab labels */
+    button[data-baseweb="tab"] {{
+        color: #5B6B82 !important;
+    }}
+    button[data-baseweb="tab"] p {{
+        color: inherit !important;
+        font-weight: 600;
+    }}
+    button[data-baseweb="tab"][aria-selected="true"] {{
+        color: {BLUE} !important;
+    }}
+    button[data-baseweb="tab"][aria-selected="true"] p {{
+        color: {BLUE} !important;
+    }}
+
+    /* Sidebar text */
+    section[data-testid="stSidebar"] {{ background-color: #FFFFFF; }}
+    section[data-testid="stSidebar"] * {{ color: {NAVY} !important; }}
+
+    /* Captions and general body text */
+    .stCaption, p {{ color: {NAVY}; }}
+
     .block-container {{ padding-top: 1.5rem; }}
 </style>
 """, unsafe_allow_html=True)
@@ -234,3 +265,4 @@ with tab3:
         top_risk["composite_risk"] = top_risk["composite_risk"].round(2)
         top_risk.columns = ["Txn ID", "Bank", "Channel", "Amount", "Comp. Risk", "Status"]
         st.dataframe(top_risk, use_container_width=True, hide_index=True, height=330)
+
